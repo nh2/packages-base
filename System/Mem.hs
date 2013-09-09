@@ -20,16 +20,32 @@
 
 module System.Mem (
         performGC
+      , performMajorGC
+      , performMinorGC
   ) where
  
 import Prelude
 
+
 #ifdef __HUGS__
 import Hugs.IOExts
+
+performMajorGC :: IO ()
+performMajorGC = performGC
+
+performMinorGC :: IO ()
+performMinorGC = performGC
 #endif
 
 #ifdef __GLASGOW_HASKELL__
+performGC :: IO ()
+performGC = performMajorGC
+
 -- | Triggers an immediate garbage collection
-foreign import ccall {-safe-} "performMajorGC" performGC :: IO ()
+foreign import ccall {-safe-} "performMajorGC" performMajorGC :: IO ()
+
+-- | Triggers an immediate minor garbage collection,
+-- or possibly a major GC if one is due.
+foreign import ccall {-safe-} "performGC" performMinorGC :: IO ()
 #endif
 
